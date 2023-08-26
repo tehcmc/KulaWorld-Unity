@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 8419963603375512290}
   - component: {fileID: 861863367832115856}
   - component: {fileID: 8375572411591365530}
+  - component: {fileID: -920967157324075389}
   m_Layer: 0
   m_Name: Collider
   m_TagString: Untagged
@@ -32,7 +33,7 @@ Transform:
   m_Children:
   - {fileID: 3773514625037147836}
   m_Father: {fileID: 0}
-  m_RootOrder: -1
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!135 &861863367832115856
 SphereCollider:
@@ -44,16 +45,16 @@ SphereCollider:
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 8
   m_ExcludeLayers:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 4294967295
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Radius: 0.3
+  m_Radius: 0.1
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &8375572411591365530
 MonoBehaviour:
@@ -67,6 +68,34 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: da9c16d9933e1564f89a8dbf63affcd9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  debugIndicator: {fileID: 4533485976382255433}
+--- !u!54 &-920967157324075389
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3920996054719779549}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 1
 --- !u!1001 &5532335407914580346
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -78,6 +107,14 @@ PrefabInstance:
     - target: {fileID: 3171579716624498570, guid: 471bb009b1ce6b94eb7835c1c3ff7d2b, type: 3}
       propertyPath: m_Name
       value: EditorOnlySphere
+      objectReference: {fileID: 0}
+    - target: {fileID: 8227197751975921715, guid: 471bb009b1ce6b94eb7835c1c3ff7d2b, type: 3}
+      propertyPath: m_CastShadows
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8227197751975921715, guid: 471bb009b1ce6b94eb7835c1c3ff7d2b, type: 3}
+      propertyPath: m_ReceiveShadows
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8689970578280736710, guid: 471bb009b1ce6b94eb7835c1c3ff7d2b, type: 3}
       propertyPath: m_RootOrder
@@ -143,5 +180,10 @@ PrefabInstance:
 --- !u!4 &3773514625037147836 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8689970578280736710, guid: 471bb009b1ce6b94eb7835c1c3ff7d2b, type: 3}
+  m_PrefabInstance: {fileID: 5532335407914580346}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &4533485976382255433 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 8227197751975921715, guid: 471bb009b1ce6b94eb7835c1c3ff7d2b, type: 3}
   m_PrefabInstance: {fileID: 5532335407914580346}
   m_PrefabAsset: {fileID: 0}
