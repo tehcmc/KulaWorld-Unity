@@ -1,8 +1,12 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using Unity.VisualScripting.ReorderableList;
 using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.UI;
+using Random = UnityEngine.Random;
 
 public class Player : MonoBehaviour
 {
@@ -10,7 +14,7 @@ public class Player : MonoBehaviour
 
 
 
-
+	private CustomInput input;
 
 
 
@@ -19,12 +23,20 @@ public class Player : MonoBehaviour
 	[SerializeField] float moveSpeed = 3f;
 	[SerializeField] float turnSpeed = 10f;
 
+	[SerializeField] float jumpHeight = 1f;
+	[SerializeField] float jumpSpeed = 3f;
+	[SerializeField] int jumpDistance = 2;
+	[SerializeField] ParticleSystem landParticle;
+
+
+
 	[SerializeField] GameObject turnPoint;
 	[SerializeField] GameObject movePoint;
 
 	[SerializeField] GameObject ball;
 
 
+	[SerializeField] GameObject parent;
 
 	[SerializeField] MoveCollider frontCollider;
 	[SerializeField] MoveCollider leftCollider;
@@ -38,6 +50,19 @@ public class Player : MonoBehaviour
 	bool jumping = false;
 	Vector3 ballpos;
 
+	private void Awake()
+	{
+		input = new CustomInput();
+	}
+	private void OnEnable()
+	{
+		input.Enable();
+	}
+	private void OnDisable()
+	{
+
+		input.Disable();
+	}
 	void Start()
 	{
 		ballpos = movePoint.transform.localPosition;
@@ -46,11 +71,19 @@ public class Player : MonoBehaviour
 	// Update is called once per frame
 	void Update()
 	{
-		if (Input.GetKey(KeyCode.A) && CanTurn())
+		HandleInput();
+
+	}
+
+	private void HandleInput()
+	{
+		bool turnRightHeld = input.Movement.TurnRight.ReadValue<float>() > 0.1f;
+		bool turnLeftHeld = input.Movement.TurnLeft.ReadValue<float>() > 0.1f;
+		if (turnLeftHeld && CanTurn())
 		{
 			Turn(-90);
 		}
-		if (Input.GetKey(KeyCode.D) && CanTurn())
+		if (turnRightHeld && CanTurn())
 		{
 			Turn(90);
 		}
@@ -59,20 +92,19 @@ public class Player : MonoBehaviour
 		{
 			TryMove();
 		}
+
+
 		if (Input.GetKeyDown(KeyCode.Space))
 		{
-			Jump();
+			TryJump();
 		}
 
 
-		if (!grounded)
-		{
-			Fall();
-		}
 	}
 
 	bool CanTurn()
 	{
+
 		if (!grounded) return false;
 		if (moving) return false;
 		if (turning) return false;
@@ -80,7 +112,9 @@ public class Player : MonoBehaviour
 	}
 	bool CanMove()
 	{
-		if (!Input.GetKey(KeyCode.W)) return false;
+		bool isMoveHeld = input.Movement.Move.ReadValue<float>() > 0.1f;
+
+		if (!isMoveHeld) return false;
 		if (!grounded) return false;
 		if (moving) return false;
 		if (turning) return false;
@@ -88,28 +122,32 @@ public class Player : MonoBehaviour
 	}
 	void TryMove()
 	{
-		if (frontCollider.IsColliding)
+		if (grounded)
 		{
-			//transform up + 1 transform forward + 1 rotate -90	
-
-			StartCoroutine(RotateUp(turnPoint.transform.right, -90));
-
-
-			return;
-		}
-
-		if (!bottomCollider.IsColliding)
-		{
-			if (leftCollider.IsColliding || rightCollider.IsColliding)
+			if (frontCollider.IsColliding)
 			{
+				//transform up + 1 transform forward + 1 rotate -90	
+
+				StartCoroutine(RotateUp(turnPoint.transform.right, -90));
+
 
 				return;
 			}
 
-			StartCoroutine(RotateAround(turnPoint.transform.right, 90));
-			return;
+			if (!bottomCollider.IsColliding)
+			{
+				if (leftCollider.IsColliding || rightCollider.IsColliding)
+				{
 
+					return;
+				}
+
+				StartCoroutine(RotateAround(turnPoint.transform.right, 90));
+				return;
+
+			}
 		}
+
 		StartCoroutine(Move(turnPoint.transform.forward));
 	}
 
@@ -117,12 +155,6 @@ public class Player : MonoBehaviour
 	{
 		if (moving) yield break;
 		moving = true;
-		if (centreCollider.IsColliding)
-		{
-
-
-			//ball.transform.position = Round(centreCollider.currentCube.position);
-		}
 
 
 
@@ -152,13 +184,22 @@ public class Player : MonoBehaviour
 		transform.position = RoundVector(movePoint.transform.position);
 
 		movePoint.transform.localPosition = ballpos;
+
+		if (centreCollider.IsColliding)
+		{
+
+			transform.parent = centreCollider.currentCube;
+			//ball.transform.position = Round(centreCollider.currentCube.position);
+		}
+
 		yield break;
 
 	}
 
 	private void RollBall(float t)
 	{
-		ball.transform.RotateAround(turnPoint.transform.right, t / turnSpeed);
+		float rand = Random.Range(0, 1);
+		ball.transform.RotateAround(turnPoint.transform.right, t / (turnSpeed + rand));
 	}
 
 	void Turn(float val)
@@ -239,64 +280,197 @@ public class Player : MonoBehaviour
 		Vector3 addPos = turnPoint.transform.forward + turnPoint.transform.up;
 		Vector3 newPosition = movePoint.transform.position + addPos;
 
-
-
-
-
-
 		movePoint.transform.RotateAround(oldPosition, axis, angle);
 		var newRotation = movePoint.transform.rotation;
 
 		float t = 0f;
-
 		while (t <= 1)
 		{
 			RollBall(1);
-			movePoint.transform.rotation = Quaternion.Lerp(oldRotation, newRotation, t * moveSpeed);
-			movePoint.transform.position = Vector3.Lerp(oldPosition, newPosition, t * moveSpeed);
-
+			movePoint.transform.SetPositionAndRotation(Vector3.Lerp(oldPosition, newPosition, t * moveSpeed), Quaternion.Lerp(oldRotation, newRotation, t * moveSpeed));
 			t += Time.deltaTime;
-
 			if (movePoint.transform.rotation == newRotation && movePoint.transform.position == newPosition) break;
-
-
 			yield return new WaitForEndOfFrame();
 		}
-		Debug.Log($"Fin: {movePoint.transform.rotation}");
+
 		turning = false;
 		movePoint.transform.rotation = newRotation;
-		Debug.Log($"ROUNDED: {movePoint.transform.rotation}");
 		yield break;
 
 	}
 
 
-	void Jump()
+	void TryJump()
 	{
 		if (!grounded) return;
-
-
+		if (turning) return;
+		grounded = false;
 
 		if (moving || Input.GetKey(KeyCode.W))
 		{
-
-			StartCoroutine(Move(transform.forward * 2));
+			StartCoroutine(JumpForwards());
 		}
 		else
 		{
-			StartCoroutine(Move(transform.up));
+			StartCoroutine(JumpForwards());
 		}
 
-		grounded = false;
+
 	}
 
+	IEnumerator Jump()
+	{
+
+
+
+
+		Vector3 oldPosition = movePoint.transform.position;
+
+		Vector3 newPosition = movePoint.transform.position += movePoint.transform.up * jumpHeight;
+
+		float t = 0f;
+
+
+
+		while (t <= 1)
+		{
+			movePoint.transform.position = Vector3.Lerp(oldPosition, newPosition, t * moveSpeed);
+			t += Time.deltaTime;
+
+			if (movePoint.transform.position == newPosition) { break; }
+			yield return new WaitForEndOfFrame();
+		}
+		StartCoroutine(falltwo());
+
+		transform.position = RoundVector(movePoint.transform.position);
+		movePoint.transform.localPosition = ballpos;
+
+
+
+
+		yield break;
+	}
+
+
+	IEnumerator JumpForwards()
+	{
+		Vector3 oldPosition = movePoint.transform.position;
+		var distFromOrigin = Vector3.Distance(transform.position, oldPosition);
+
+		Vector3 newHeight = movePoint.transform.position += movePoint.transform.up * jumpHeight;
+
+
+
+		Debug.Log(distFromOrigin);
+
+		Debug.Log("jump dist norm" + turnPoint.transform.forward * jumpDistance);
+
+		Debug.Log("jump dist fixed" + turnPoint.transform.forward * (jumpDistance - distFromOrigin));
+
+		Vector3 newPosition = movePoint.transform.position += turnPoint.transform.forward * (jumpDistance - distFromOrigin);
+
+
+
+		float t = 0f;
+		Vector3 testo = movePoint.transform.position;
+		Vector3 test2 = movePoint.transform.position;
+		while (t <= 1)
+		{
+			if (test2 != newHeight)
+			{
+				testo = Vector3.Lerp(oldPosition, newHeight * 2, (t) * jumpSpeed);
+				test2 = testo;
+
+				Debug.Log("Test2 " + test2 + " newheight " + newHeight);
+				Debug.Log("up");
+
+			}
+			else
+			{
+				testo = Vector3.Lerp(newHeight, movePoint.transform.up, t * jumpSpeed);
+				Debug.Log("down");
+			}
+
+
+			movePoint.transform.position = Vector3.Lerp(oldPosition, newPosition, t * moveSpeed);
+
+
+			testo.x = movePoint.transform.position.x; testo.z = movePoint.transform.position.z;
+
+			movePoint.transform.position = testo;
+			//Debug.Log("Transform Pos" + movePoint.transform.position + "Added Pos" + testo + "New Pos " + newPosition);
+
+			if (movePoint.transform.position == newPosition)
+			{
+				Debug.Log("land");
+				break;
+			}
+
+			t += Time.deltaTime;
+			yield return new WaitForEndOfFrame();
+		}
+
+		StartCoroutine(falltwo());
+
+
+		transform.position = RoundVector(movePoint.transform.position);
+		movePoint.transform.localPosition = ballpos;
+
+		//StartCoroutine(Move(turnPoint.transform.forward * (float)jumpDistance));
+
+
+
+
+		yield break;
+	}
+
+	IEnumerator falltwo()
+	{
+
+		while (!centreCollider.IsColliding)
+		{
+			if (centreCollider.IsColliding) break;
+
+			Vector3 oldPosition = movePoint.transform.position;
+
+			Vector3 newPosition = movePoint.transform.position -= movePoint.transform.up * jumpHeight;
+
+			float t = 0f;
+			while (t <= 1)
+			{
+
+
+				movePoint.transform.position = Vector3.Lerp(oldPosition, newPosition, t * jumpSpeed);
+				if (movePoint.transform.position == newPosition) break;
+				t += Time.deltaTime;
+
+
+				yield return new WaitForEndOfFrame();
+			}
+
+			transform.position = RoundVector(movePoint.transform.position);
+			movePoint.transform.localPosition = ballpos;
+		}
+
+		Instantiate(landParticle, ball.transform.position, Quaternion.identity); grounded = true;
+		grounded = true;
+
+
+		yield break;
+
+	}
 	void Fall()
 	{
 		if (grounded) return;
+		Debug.Log("fall");
 
+		StartCoroutine(Move(-movePoint.transform.up * jumpHeight));
 
-		StartCoroutine(Move(-transform.up));
-		if (centreCollider.IsColliding) grounded = true; return;
+		if (centreCollider.IsColliding)
+		{
+			grounded = true; Debug.Log("land");
+			return;
+		}
 
 	}
 
