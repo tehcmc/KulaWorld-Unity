@@ -28,12 +28,14 @@ public class Player : MonoBehaviour
 	[SerializeField] int jumpDistance = 2;
 	[SerializeField] ParticleSystem landParticle;
 
-
+	[SerializeField] Vector3 height;
 
 	[SerializeField] GameObject turnPoint;
+	[SerializeField] GameObject cameraTurn;
+	float originalAngle = 0f;
 	[SerializeField] GameObject movePoint;
 
-	[SerializeField] GameObject ball;
+	[SerializeField] MoveCollider ball;
 
 
 	[SerializeField] GameObject parent;
@@ -52,6 +54,7 @@ public class Player : MonoBehaviour
 
 	private void Awake()
 	{
+		originalAngle = cameraTurn.transform.rotation.eulerAngles.x;
 		input = new CustomInput();
 	}
 	private void OnEnable()
@@ -72,7 +75,7 @@ public class Player : MonoBehaviour
 	void Update()
 	{
 		HandleInput();
-
+		if (centreCollider.currentCube) centreCollider.currentCube.Occupied = true;
 	}
 
 	private void HandleInput()
@@ -94,11 +97,17 @@ public class Player : MonoBehaviour
 		}
 
 
-		if (Input.GetKeyDown(KeyCode.Space))
+		if (input.Movement.Jump.IsPressed())
 		{
 			TryJump();
 		}
 
+		if (Input.GetKeyDown(KeyCode.Q))
+		{
+
+			TiltCamera(-30);
+
+		}
 
 	}
 
@@ -115,7 +124,7 @@ public class Player : MonoBehaviour
 		bool isMoveHeld = input.Movement.Move.ReadValue<float>() > 0.1f;
 
 		if (!isMoveHeld) return false;
-		if (!grounded) return false;
+
 		if (moving) return false;
 		if (turning) return false;
 		return true;
@@ -146,12 +155,17 @@ public class Player : MonoBehaviour
 				return;
 
 			}
+
+			StartCoroutine(Move(turnPoint.transform.forward, 1f));
+		}
+		else
+		{
+			RollBall(1);
 		}
 
-		StartCoroutine(Move(turnPoint.transform.forward));
 	}
 
-	IEnumerator Move(Vector3 direction)
+	IEnumerator Move(Vector3 direction, float distance)
 	{
 		if (moving) yield break;
 		moving = true;
@@ -159,13 +173,18 @@ public class Player : MonoBehaviour
 
 
 
-
-
 		Vector3 oldPosition = movePoint.transform.position;
 
-		Vector3 newPosition = movePoint.transform.position += direction;
+		Vector3 newPosition = movePoint.transform.position += direction * distance;
 
 		float t = 0f;
+
+		if (centreCollider.currentCube && Vector3.Distance(centreCollider.currentCube.transform.position, movePoint.transform.position) != 0)
+		{
+			//	moving = false;
+			//	yield return StartCoroutine(RecentreBall());
+		}
+
 
 
 
@@ -181,25 +200,63 @@ public class Player : MonoBehaviour
 		}
 
 		moving = false;
+
 		transform.position = RoundVector(movePoint.transform.position);
 
 		movePoint.transform.localPosition = ballpos;
 
-		if (centreCollider.IsColliding)
-		{
-
-			transform.parent = centreCollider.currentCube;
-			//ball.transform.position = Round(centreCollider.currentCube.position);
-		}
+		if (centreCollider.IsColliding) transform.parent = centreCollider.currentCube.transform;
 
 		yield break;
 
 	}
 
+	IEnumerator RecentreBall()
+	{
+
+		if (moving) yield break;
+		moving = true;
+
+
+		Debug.Log("Recentre");
+
+		Vector3 oldPosition = movePoint.transform.position;
+
+		Vector3 newPosition = centreCollider.currentCube.transform.position;
+
+		float t = 0f;
+
+		while (t <= 1)
+		{
+			RollBall(1);
+
+			movePoint.transform.position = Vector3.Lerp(oldPosition, newPosition, t * moveSpeed);
+			t += Time.deltaTime;
+			yield return new WaitForEndOfFrame();
+		}
+
+		moving = false;
+
+		transform.position = RoundVector(movePoint.transform.position);
+
+		movePoint.transform.localPosition = ballpos;
+
+		if (centreCollider.IsColliding) transform.parent = centreCollider.currentCube.transform;
+
+		yield break;
+
+	}
+
+
+
+
+
+
+
 	private void RollBall(float t)
 	{
 		float rand = Random.Range(0, 1);
-		ball.transform.RotateAround(turnPoint.transform.right, t / (turnSpeed + rand));
+		ball.gameObject.transform.RotateAround(turnPoint.transform.right, t / (turnSpeed + rand));
 	}
 
 	void Turn(float val)
@@ -304,8 +361,8 @@ public class Player : MonoBehaviour
 	{
 		if (!grounded) return;
 		if (turning) return;
-		grounded = false;
 
+		transform.parent = null;
 		if (moving || Input.GetKey(KeyCode.W))
 		{
 			StartCoroutine(JumpForwards());
@@ -320,17 +377,13 @@ public class Player : MonoBehaviour
 
 	IEnumerator Jump()
 	{
-
-
-
-
+		if (!grounded) yield break;
+		grounded = false;
 		Vector3 oldPosition = movePoint.transform.position;
 
 		Vector3 newPosition = movePoint.transform.position += movePoint.transform.up * jumpHeight;
 
 		float t = 0f;
-
-
 
 		while (t <= 1)
 		{
@@ -340,139 +393,130 @@ public class Player : MonoBehaviour
 			if (movePoint.transform.position == newPosition) { break; }
 			yield return new WaitForEndOfFrame();
 		}
-		StartCoroutine(falltwo());
-
-		transform.position = RoundVector(movePoint.transform.position);
-		movePoint.transform.localPosition = ballpos;
-
+		StartCoroutine(Fall());
 
 
 
 		yield break;
+
 	}
 
-
+	//f(t) = -h*t*(t-1)
 	IEnumerator JumpForwards()
 	{
+		grounded = false;
+
+		CharacterController ctr;
+
+
 		Vector3 oldPosition = movePoint.transform.position;
-		var distFromOrigin = Vector3.Distance(transform.position, oldPosition);
 
-		Vector3 newHeight = movePoint.transform.position += movePoint.transform.up * jumpHeight;
-
-
-
-		Debug.Log(distFromOrigin);
-
-		Debug.Log("jump dist norm" + turnPoint.transform.forward * jumpDistance);
-
-		Debug.Log("jump dist fixed" + turnPoint.transform.forward * (jumpDistance - distFromOrigin));
+		float distFromOrigin = Vector3.Distance(transform.position, oldPosition); // get distance from centre point of the cube. old pos is set when space is pressed
+																				  // so could be different from transform.pos
 
 		Vector3 newPosition = movePoint.transform.position += turnPoint.transform.forward * (jumpDistance - distFromOrigin);
 
 
+		Vector3 heightVector = movePoint.transform.up;
+
+		Vector3 upVec;
+
 
 		float t = 0f;
-		Vector3 testo = movePoint.transform.position;
-		Vector3 test2 = movePoint.transform.position;
+
+
 		while (t <= 1)
 		{
-			if (test2 != newHeight)
+			RollBall(1);
+			if (ball.IsColliding)
 			{
-				testo = Vector3.Lerp(oldPosition, newHeight * 2, (t) * jumpSpeed);
-				test2 = testo;
-
-				Debug.Log("Test2 " + test2 + " newheight " + newHeight);
-				Debug.Log("up");
-
-			}
-			else
-			{
-				testo = Vector3.Lerp(newHeight, movePoint.transform.up, t * jumpSpeed);
-				Debug.Log("down");
+				//break;
 			}
 
+			float jHeight = jumpHeight * Mathf.Sin(Mathf.PI * t * moveSpeed);
 
-			movePoint.transform.position = Vector3.Lerp(oldPosition, newPosition, t * moveSpeed);
+			jHeight = Mathf.Clamp(jHeight, 0f, jumpHeight);
+			upVec = new Vector3(heightVector.x, heightVector.y, heightVector.z) * jHeight;
 
+			height = upVec;
+			movePoint.transform.position = Vector3.Lerp(oldPosition, newPosition, t * moveSpeed);//move forwards 
 
-			testo.x = movePoint.transform.position.x; testo.z = movePoint.transform.position.z;
+			movePoint.transform.position += upVec;
 
-			movePoint.transform.position = testo;
-			//Debug.Log("Transform Pos" + movePoint.transform.position + "Added Pos" + testo + "New Pos " + newPosition);
-
-			if (movePoint.transform.position == newPosition)
-			{
-				Debug.Log("land");
-				break;
-			}
+			if (movePoint.transform.position == newPosition) { break; }
 
 			t += Time.deltaTime;
 			yield return new WaitForEndOfFrame();
+
 		}
 
-		StartCoroutine(falltwo());
 
-
-		transform.position = RoundVector(movePoint.transform.position);
-		movePoint.transform.localPosition = ballpos;
-
-		//StartCoroutine(Move(turnPoint.transform.forward * (float)jumpDistance));
-
-
-
-
+		StartCoroutine(Fall());
 		yield break;
 	}
 
-	IEnumerator falltwo()
+	IEnumerator Fall()
 	{
-
-		while (!centreCollider.IsColliding)
+		if (grounded) yield break;
+		//tilt camera down, return to original pos when landing
+		if (centreCollider.IsColliding)
 		{
-			if (centreCollider.IsColliding) break;
+			Instantiate(landParticle, ball.transform.position, Quaternion.identity);
+			transform.position = RoundVector(movePoint.transform.position);
+			movePoint.transform.localPosition = ballpos;
+			grounded = true;
+			yield break;
+		}
 
-			Vector3 oldPosition = movePoint.transform.position;
 
-			Vector3 newPosition = movePoint.transform.position -= movePoint.transform.up * jumpHeight;
+		Vector3 oldPosition = movePoint.transform.position;
 
-			float t = 0f;
-			while (t <= 1)
+		Vector3 newPosition = movePoint.transform.position -= movePoint.transform.up * jumpHeight;
+
+		float t = 0f;
+
+		while (t <= 1)
+		{
+
+
+			movePoint.transform.position = Vector3.Lerp(oldPosition, newPosition, t * jumpSpeed);
+
+			if (movePoint.transform.position == newPosition) break;
+			t += Time.deltaTime;
+
+			if (centreCollider.IsColliding)
 			{
 
 
-				movePoint.transform.position = Vector3.Lerp(oldPosition, newPosition, t * jumpSpeed);
-				if (movePoint.transform.position == newPosition) break;
-				t += Time.deltaTime;
 
+				Instantiate(landParticle, ball.transform.position, Quaternion.identity);
+				transform.position = RoundVector(movePoint.transform.position);
+				movePoint.transform.localPosition = ballpos;
+				grounded = true;
+				transform.parent = centreCollider.currentCube.transform;
+				if (centreCollider.currentCube && Mathf.Abs(Vector3.Distance(centreCollider.currentCube.transform.position, movePoint.transform.position)) > 0)
+				{
 
-				yield return new WaitForEndOfFrame();
+					//yield return StartCoroutine(RecentreBall());
+				}
+
+				yield break;
 			}
 
-			transform.position = RoundVector(movePoint.transform.position);
-			movePoint.transform.localPosition = ballpos;
+			yield return new WaitForEndOfFrame();
 		}
 
-		Instantiate(landParticle, ball.transform.position, Quaternion.identity); grounded = true;
-		grounded = true;
 
 
-		yield break;
 
-	}
-	void Fall()
-	{
-		if (grounded) return;
-		Debug.Log("fall");
 
-		StartCoroutine(Move(-movePoint.transform.up * jumpHeight));
 
-		if (centreCollider.IsColliding)
-		{
-			grounded = true; Debug.Log("land");
-			return;
-		}
+
+		yield return StartCoroutine(Fall());
 
 	}
+
+
 
 
 	void SnapMove()
@@ -512,4 +556,35 @@ public class Player : MonoBehaviour
 
 		return (float)snappedRotation;
 	}
+
+
+	void TiltCamera(float angle)
+	{
+		var newRotation = Quaternion.Euler(angle, 0, 0);
+		cameraTurn.transform.rotation = newRotation;
+	}
+
+	Vector3 CalculateJumpArc(Vector3 forward, Vector3 up)
+	{
+		// pass in up pos
+
+		// pass in fwd pos
+
+		//create holding variable, up + fwd
+
+		//multiply up by holding. up = 0,1,0 thus x*0 and z*0 = 0, only mults up/y
+
+
+		Vector3 added = forward + up;
+
+		added.y = Mathf.Sin(jumpSpeed * Time.time) * jumpDistance;
+
+		var calculatedCurve = Vector3.zero;
+
+		calculatedCurve = Vector3.Scale(up, added);
+		return calculatedCurve;
+	}
+
+
+
 }
