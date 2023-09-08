@@ -4,13 +4,13 @@ using UnityEngine;
 
 public class Collectible : MonoBehaviour
 {
-	// Start is called before the first frame update
+	[SerializeField] int scoreValue = 100;
+	[SerializeField] ParticleSystem pickupParticle;
 	void Start()
 	{
 
 	}
 
-	// Update is called once per frame
 	void Update()
 	{
 
