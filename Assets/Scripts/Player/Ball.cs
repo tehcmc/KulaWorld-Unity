@@ -17,15 +17,18 @@ public class Ball : MoveCollider
 
 	[SerializeField] Color heatColor; 
 
+
+
 	[SerializeField] public MoveCollider bottomCollider { get; protected set; }
 	public Color HeatColor { get => heatColor; set => heatColor = value; }
 	public Color DefaultColor { get => defaultColor; set => defaultColor = value; }
 
+	public GameObject BallModel { get => ballModel; set => ballModel = value; }
 
 	private void Awake()
 	{
 		gameManager = GameManager.Instance;
-		if (!ballModel) Destroy(gameObject);
+		if (!BallModel) Debug.LogError("No model");
 	}
 	void Start()
 	{
@@ -41,7 +44,7 @@ public class Ball : MoveCollider
 	public void RollBall(Vector3 dir)
 	{
 
-		ballModel.gameObject.transform.RotateAround(dir, gameManager.gameTime * turnSpeed);
+		BallModel.gameObject.transform.RotateAround(dir, gameManager.gameTime * turnSpeed);
 	}
 
 }

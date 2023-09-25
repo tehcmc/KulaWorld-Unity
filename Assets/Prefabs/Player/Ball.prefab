@@ -9,15 +9,15 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 491664980478914971}
-  - component: {fileID: 3860007936636613915}
-  - component: {fileID: 3140052402306389914}
-  - component: {fileID: 825812640897400383}
   - component: {fileID: 255736907553928856}
+  - component: {fileID: 3140052402306389914}
+  - component: {fileID: 215347321023159711}
+  - component: {fileID: 825812640897400383}
+  - component: {fileID: 3860007936636613915}
   - component: {fileID: 7006199495135954713}
   - component: {fileID: 8633834694415867982}
   - component: {fileID: 1093794133633069406}
   - component: {fileID: 3111503402870547889}
-  - component: {fileID: 215347321023159711}
   m_Layer: 0
   m_Name: Ball
   m_TagString: Ball
@@ -43,29 +43,26 @@ Transform:
   - {fileID: 6665688260874602264}
   - {fileID: 7319539569123984379}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
+  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!135 &3860007936636613915
-SphereCollider:
+--- !u!114 &255736907553928856
+MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8554697963445301173}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 1
-  m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 3
-  m_Radius: 0.149
-  m_Center: {x: 0, y: 0, z: 0}
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 79b5294ea9c0cf548b34672aeb4c9213, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  showColourIndicator: 1
+  debugIndicator: {fileID: 0}
+  turnSpeed: 20
+  ballModel: {fileID: 1600438553389956431}
+  defaultColor: {r: 1, g: 1, b: 1, a: 1}
+  heatColor: {r: 1, g: 0, b: 0, a: 1}
 --- !u!114 &3140052402306389914
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -80,6 +77,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   showColourIndicator: 0
   debugIndicator: {fileID: 5195658996542049014}
+--- !u!95 &215347321023159711
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8554697963445301173}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 27e38318c81461f499e6ae735bc69e17, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!54 &825812640897400383
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -107,22 +125,27 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 1
---- !u!114 &255736907553928856
-MonoBehaviour:
+--- !u!135 &3860007936636613915
+SphereCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8554697963445301173}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
   m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 79b5294ea9c0cf548b34672aeb4c9213, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  showColourIndicator: 1
-  debugIndicator: {fileID: 0}
-  turnSpeed: 20
-  ballModel: {fileID: 1600438553389956431}
+  serializedVersion: 3
+  m_Radius: 0.149
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!135 &7006199495135954713
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -207,27 +230,6 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 0.05
   m_Center: {x: 0, y: 0, z: 0.14}
---- !u!95 &215347321023159711
-Animator:
-  serializedVersion: 5
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8554697963445301173}
-  m_Enabled: 1
-  m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: 27e38318c81461f499e6ae735bc69e17, type: 2}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_StabilizeFeet: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorStateOnDisable: 0
-  m_WriteDefaultValuesOnDisable: 0
 --- !u!1001 &2093259334540190781
 PrefabInstance:
   m_ObjectHideFlags: 0

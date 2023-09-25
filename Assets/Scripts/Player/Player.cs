@@ -16,12 +16,15 @@ public class Player : MonoBehaviour
 	public int CurrentFruit { get => currentFruit; set => currentFruit = value; }
 
 	[SerializeField][Tooltip("Time in seconds before ball explodes due to overheating.")] float heatTime = 3f; // if player is on heat square, increment num until <= to this then kill player. If player moves off of heat square, decrement number till 0.
-	float currentHeat = 1f;
-
+	[SerializeField] float currentHeat = 0f;
+	[SerializeField] float currentColour = 0f;
 
 	private void Awake()
 	{
-		ballMesh = ball.gameObject.GetComponentInChildren<MeshRenderer>();
+		ballMesh = ball.BallModel.GetComponent<MeshRenderer>();
+		if (ball) Debug.Log("ball");
+		if (ballMesh) Debug.Log("mesh");
+		heatTime = heatTime - 1;
 	}
 
 
@@ -42,11 +45,12 @@ public class Player : MonoBehaviour
 	{
 		if (!isHeating)
 		{
-			if (currentHeat > 0)
+			if (currentHeat <= 0)
+				return;
+			else
 			{
 				CoolDown(time);
 			}
-			else return;
 		}
 		else
 		{
@@ -60,17 +64,37 @@ public class Player : MonoBehaviour
 
 	void HeatUp(float time)
 	{
-		if (currentHeat >= heatTime-1) return;
+		if (currentHeat >= heatTime) return;
 		if (!IsHeating) return;
 
 		currentHeat += time;
-		ballMesh.material.color = Color.Lerp(ballMesh.material.color, ball.HeatColor, time/heatTime);
+
+
+		currentColour = Mathf.Clamp01(currentHeat/heatTime);
+		
+
+		currentHeat = Mathf.Clamp(currentHeat, 0f, heatTime);
+
+
+		ballMesh.material.color = new Color(ballMesh.material.color.r, ballMesh.material.color.r -currentColour, ballMesh.material.color.r - currentColour);
+		//	ballMesh.material.color = Color.Lerp(ballMesh.material.color, ball.HeatColor,currentColour);
+
 	}
 	void CoolDown(float time)
 	{
-		if (currentHeat < 0) { currentHeat = 0; return;}
+		if (currentHeat <= 0) {return;}
 		if (IsHeating) return;
-		ballMesh.material.color = Color.Lerp(ballMesh.material.color, ball.DefaultColor, time / heatTime);
-		currentHeat -= time;
+
+		currentHeat -= time; 
+
+
+		currentColour = Mathf.Clamp01(currentHeat/heatTime);
+
+		currentHeat = Mathf.Clamp(currentHeat, 0f, heatTime);
+
+		
+		ballMesh.material.color = new Color(ballMesh.material.color.r, ballMesh.material.color.r - currentColour, ballMesh.material.color.r - currentColour);
+		//	ballMesh.material.color = new Color(ballMesh.material.color.r,currentColour*255,currentColour*255);
+		//ballMesh.material.color = Color.Lerp(ballMesh.material.color, ball.DefaultColor, currentColour);
 	}
 }

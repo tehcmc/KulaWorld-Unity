@@ -142,12 +142,7 @@ public class PlayerMovement : MonoBehaviour
 
 
 
-		if (Input.GetKeyDown(KeyCode.Q))
-		{
-
-			TiltCamera(-30);
-
-		}
+	
 
 	}
 	// -- Turning
