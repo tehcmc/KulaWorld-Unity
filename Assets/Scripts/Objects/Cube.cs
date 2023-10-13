@@ -34,19 +34,22 @@ public class Cube : MonoBehaviour
 
 
 
-
+	Stage stageType;
 
 
 	private void Awake()
 	{
 		MeshRenderer mr = cubeMesh.GetComponent<MeshRenderer>();
 		defaultColor = mr.material.color;
+		
 	}
+
+
 	private void OnEnable()
 	{
 
-
-		Material stageMaterial = GameManager.Instance.Stages.GetStage(transform.parent.name).StageMaterial;
+		stageType = GetComponentInParent<Stage>();
+		Material stageMaterial = stageType.Details.StageMaterial;
 		mat = stageMaterial;
 
 		if (mat != null) cubeMesh.GetComponent<MeshRenderer>().material = mat;

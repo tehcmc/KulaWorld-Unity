@@ -1620,7 +1620,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7426310736930939239, guid: 83a151c94bf06804088558374275c521, type: 3}
       propertyPath: heatTime
-      value: 4
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 7426310736930939239, guid: 83a151c94bf06804088558374275c521, type: 3}
       propertyPath: currentHeat
@@ -2514,7 +2514,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh-5914
+  m_Name: pb_Mesh-8908
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -3639,19 +3639,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f8037163d5888f2499b772a03f735d5d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  stages:
-  - stageMaterial: {fileID: 2100000, guid: 394790644d7b1244eacaec96f14c3cf8, type: 2}
-    stageSkybox: {fileID: 0}
-    stageMusic: {fileID: 8300000, guid: 791331f570d951d4d8be265ef629da1a, type: 3}
-    stageName: Egypt
-  - stageMaterial: {fileID: 2100000, guid: c3d642afa02f79f439b59af9eca1462b, type: 2}
-    stageSkybox: {fileID: 0}
-    stageMusic: {fileID: 8300000, guid: dcfeed9b0dad624479484184f58594b2, type: 3}
-    stageName: Hills
-  - stageMaterial: {fileID: 2100000, guid: 1966f90f3558fce46a3ab74d6b6e9a73, type: 2}
-    stageSkybox: {fileID: 0}
-    stageMusic: {fileID: 8300000, guid: 60545087eaf7bfe41b3adae0586d5109, type: 3}
-    stageName: Aztec
+  detailsList: []
 --- !u!82 &880042534
 AudioSource:
   m_ObjectHideFlags: 0
@@ -5369,7 +5357,7 @@ PrefabInstance:
       objectReference: {fileID: 612832417}
     - target: {fileID: 2323374871916157742, guid: 591f25d2d7ad75140a2726b8c04a8056, type: 3}
       propertyPath: m_VersionIndex
-      value: 12553
+      value: 12556
       objectReference: {fileID: 0}
     - target: {fileID: 2436316465339859471, guid: 591f25d2d7ad75140a2726b8c04a8056, type: 3}
       propertyPath: m_Mesh
@@ -5785,6 +5773,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1891094657}
+  - component: {fileID: 1891094658}
   m_Layer: 0
   m_Name: Egypt
   m_TagString: Untagged
@@ -5864,6 +5853,24 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 9
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1891094658
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1891094656}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c86df1649d42fc4489e002038c2cf5e7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stageType: Egypt
+  details:
+    stageMaterial: {fileID: 0}
+    stageSkybox: {fileID: 0}
+    stageMusic: {fileID: 0}
+    stageName: 
 --- !u!1001 &1966554121
 PrefabInstance:
   m_ObjectHideFlags: 0

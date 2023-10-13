@@ -35,12 +35,17 @@ public class Oscillator : MonoBehaviour
 	private void Move()
 	{
 		t += GameManager.Instance.gameTime;
-
-		float xPos = Oscillate(t, xSpeed, xScale);
-		float yPos = Oscillate(t, ySpeed, yScale);
-		float zPos = Oscillate(t, zSpeed, zScale);
+		float xPos, yPos, zPos;
+		NewMethod(out xPos, out yPos, out zPos);
 
 		transform.localPosition = new Vector3(xPos, yPos, zPos);
+
+		void NewMethod(out float xPos, out float yPos, out float zPos)
+		{
+			xPos = Oscillate(t, xSpeed, xScale);
+			yPos = Oscillate(t, ySpeed, yScale);
+			zPos = Oscillate(t, zSpeed, zScale);
+		}
 	}
 
 	float Oscillate(float time, float speed, float scale)

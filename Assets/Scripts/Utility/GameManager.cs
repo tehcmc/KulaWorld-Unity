@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(StageList))]
+[RequireComponent(typeof(StageDetailsList))]
 public class GameManager : MonoBehaviour
 {
 	public static GameManager Instance;
@@ -14,11 +14,11 @@ public class GameManager : MonoBehaviour
 	[SerializeField] bool changeFPS = false;
 	[SerializeField][Range(1, 145)] int targetFrames = 60;
 
-	StageList stages;
+	StageDetailsList stages;
 
 	AudioSource audio;
 
-	public StageList Stages { get => stages; protected set => stages = value; }
+	public StageDetailsList Stages { get => stages; protected set => stages = value; }
 
 	private void Awake()
 	{
@@ -35,7 +35,7 @@ public class GameManager : MonoBehaviour
 		Application.targetFrameRate = targetFrames;
 
 		audio = GetComponent<AudioSource>();
-		Stages = GetComponent<StageList>();
+		Stages = GetComponent<StageDetailsList>();
 
 
 	}
@@ -47,7 +47,7 @@ public class GameManager : MonoBehaviour
 	private void Start()
 	{
 
-		var music = Stages.GetStage("Egypt").StageMusic;
+		//var music = Stages.GetStageDetails("Egypt").StageMusic;
 		//if (music) audio.PlayOneShot(music);
 	}
 	void Update()
